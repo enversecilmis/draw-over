@@ -3,40 +3,45 @@ import { cn } from "./utils"
 
 
 
-
-
 class ColorSphere {
-	color: string
+	private pen: CanvasPen
+	private _color = ""
+	
 	view: HTMLDivElement
-	setColor: (newColor: string) => void
+	
+	get color(): string {
+		return this._color
+	}
+	set color(value: string) {
+		this._color = value
+		this.view.style.backgroundColor = value
+
+		if (value === this.pen.color)
+			this.view.classList.add(cn("color-sphere-selected"))
+		else
+			this.view.classList.remove(cn("color-sphere-selected"))
+	}
 
 
 	constructor(color: string, pen: CanvasPen) {
+		this.pen = pen
 		this.color = color
 		this.view = document.createElement("div")
-		this.view.style.backgroundColor = color
 		this.view.classList.add(cn("color-sphere"))
-		if (color === pen.color)
-			this.view.classList.add(cn("color-sphere-selected"))
+		
 
-		this.view.onclick = () => this.color && pen.setColor(this.color)
+		this.view.addEventListener("click", () => {
+			if (!this.color)
+				return
+			pen.color = this.color
+		})
 
-		pen.onColorChange(() => {
-			if (this.color === pen.color)
+		pen.onColorChange(color => {
+			if (this.color === color)
 				this.view.classList.add(cn("color-sphere-selected"))
 			else
 				this.view.classList.remove(cn("color-sphere-selected"))
 		})
-
-		this.setColor = (newColor: string) => {
-			this.color = newColor
-			this.view.style.backgroundColor = newColor
-
-			if (this.color === pen.color)
-				this.view.classList.add(cn("color-sphere-selected"))
-			else
-				this.view.classList.remove(cn("color-sphere-selected"))
-		}
 	}
 }
 

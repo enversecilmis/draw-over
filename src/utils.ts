@@ -1,3 +1,5 @@
+export type NEmptyArr<T> = [T, ...T[]]
+
 const UNIQUE_TEXT = "AeeEIVRHk7s8xzuY"
 
 export const cn = (className: string) => `${className}-${UNIQUE_TEXT}`

@@ -2,14 +2,16 @@ import CanvasControls from "./canvas-controls"
 import CanvasHistory from "./canvas-history"
 import CanvasPen from "./canvas-pen"
 import ColorPalette from "./color-palette"
-import { DEFAULT_COLOR_PALETTE, cn } from "./utils"
+import { DEFAULT_COLOR_PALETTE, NEmptyArr, cn } from "./utils"
 
 
 
+type Options = {
+	defaultColors: NEmptyArr<string>
+}
 
 
-
-class Drawable {
+class DrawOver {
 	drawedOnElement: HTMLElement
 	canvas: HTMLCanvasElement
 	context: CanvasRenderingContext2D
@@ -18,18 +20,20 @@ class Drawable {
 	colorPalette: ColorPalette
 	controlPanel: CanvasControls
 
+	
+	private penData = {
+		dragged: false,
+		coords: { x: 0, y: 0, px: 0, py: 0 }
+	}
 
-	constructor(
-		selector: string,
-		{
-			defaultColors = DEFAULT_COLOR_PALETTE,
-		} = {},
-	) {
+
+	constructor(selector: string, {
+		defaultColors = DEFAULT_COLOR_PALETTE as NEmptyArr<string>,
+	}: Options) {
 		this.drawedOnElement = document.querySelector(selector) as HTMLElement
 
 		if (!this.drawedOnElement)
 			throw new Error(`Couldn't find any element with the selector: ${selector}.`)
-
 
 		if (!this.drawedOnElement.style.position || this.drawedOnElement.style.position === "static")
 			this.drawedOnElement.style.position = "relative"
@@ -58,28 +62,13 @@ class Drawable {
 		this.context.globalCompositeOperation = "source-over"
 
 
-		this.colorPalette = new ColorPalette(defaultColors)
-		this.pen = new CanvasPen(this.colorPalette.defaultColors[0])
 		this.history = new CanvasHistory(this.canvas.toDataURL())
+		this.colorPalette = new ColorPalette(defaultColors)
+		this.pen = new CanvasPen(this.context, { hexColor: this.colorPalette.defaultColors[0] })
 		this.controlPanel = new CanvasControls(this, this.pen, this.colorPalette, this.history)
 		this.context.strokeStyle = this.pen.color
 		this.context.lineWidth = this.pen.size
 
-
-		// State syncronization
-		this.pen.onColorChange(() => {
-			this.context.strokeStyle = this.pen.color
-			this.pen.stopErasing()
-		})
-		this.pen.onSizeChange(() => {
-			this.context.lineWidth = this.pen.size
-		})
-		this.pen.onErasingStateChange(() => {
-			if (this.pen.erasing)
-				this.context.globalCompositeOperation = "destination-out"
-			else
-				this.context.globalCompositeOperation = "source-over"
-		})
 
 		this.history.onHistoryMove(() => {
 			this.loadFromDataUrl(this.history.currentStep)
@@ -88,34 +77,34 @@ class Drawable {
 
 	penDown = (e: MouseEvent) => {
 		const rect = this.canvas.getBoundingClientRect()
-		this.pen.coords.px = e.pageX - window.pageXOffset - rect.left
-		this.pen.coords.py = e.pageY - window.pageYOffset - rect.top
+		this.penData.coords.px = e.pageX - window.pageXOffset - rect.left
+		this.penData.coords.py = e.pageY - window.pageYOffset - rect.top
 		this.canvas.addEventListener("mousemove", this.penMove)
 	}
 
 
 	penUp = () => {
-		if (this.pen.drawed)
+		if (this.penData.dragged)
 			this.history.pushHistory(this.canvas.toDataURL())
-		this.pen.drawed = false
+		this.penData.dragged = false
 		this.canvas.removeEventListener("mousemove", this.penMove)
 	}
 
 
 	penMove = (e: MouseEvent) => {
 		const rect = this.canvas.getBoundingClientRect()
-		this.pen.coords.x = e.pageX - window.pageXOffset - rect.left
-		this.pen.coords.y = e.pageY - window.pageYOffset - rect.top
+		this.penData.coords.x = e.pageX - window.pageXOffset - rect.left
+		this.penData.coords.y = e.pageY - window.pageYOffset - rect.top
 
 		// DRAW THE LINE
 		this.context.beginPath()
-		this.context.moveTo(this.pen.coords.px, this.pen.coords.py)
-		this.context.lineTo(this.pen.coords.x, this.pen.coords.y)
+		this.context.moveTo(this.penData.coords.px, this.penData.coords.py)
+		this.context.lineTo(this.penData.coords.x, this.penData.coords.y)
 		this.context.stroke()
 
-		this.pen.coords.px = this.pen.coords.x
-		this.pen.coords.py = this.pen.coords.y
-		this.pen.drawed = true
+		this.penData.coords.px = this.penData.coords.x
+		this.penData.coords.py = this.penData.coords.y
+		this.penData.dragged = true
 	}
 
 
@@ -123,34 +112,34 @@ class Drawable {
 		e.preventDefault()
 
 		const rect = this.canvas.getBoundingClientRect()
-		this.pen.coords.px = e.touches[0].pageX - window.pageXOffset - rect.left
-		this.pen.coords.py = e.touches[0].pageY - window.pageYOffset - rect.top
+		this.penData.coords.px = e.touches[0].pageX - window.pageXOffset - rect.left
+		this.penData.coords.py = e.touches[0].pageY - window.pageYOffset - rect.top
 		this.canvas.addEventListener("touchmove", this.touchPenMove)
 	}
 
 	touchPenUp = (e: TouchEvent) => {
 		e.preventDefault()
-		if (this.pen.drawed)
+		if (this.penData.dragged)
 			this.history.pushHistory(this.canvas.toDataURL())
-		this.pen.drawed = false
+		this.penData.dragged = false
 		this.canvas.removeEventListener("touchmove", this.touchPenMove)
 	}
 
 	touchPenMove = (e: TouchEvent) => {
 		e.preventDefault()
 		const rect = this.canvas.getBoundingClientRect()
-		this.pen.coords.x = e.touches[0].pageX - window.pageXOffset - rect.left
-		this.pen.coords.y = e.touches[0].pageY - window.pageYOffset - rect.top
+		this.penData.coords.x = e.touches[0].pageX - window.pageXOffset - rect.left
+		this.penData.coords.y = e.touches[0].pageY - window.pageYOffset - rect.top
 
 		// DRAW THE LINE
 		this.context.beginPath()
-		this.context.moveTo(this.pen.coords.px, this.pen.coords.py)
-		this.context.lineTo(this.pen.coords.x, this.pen.coords.y)
+		this.context.moveTo(this.penData.coords.px, this.penData.coords.py)
+		this.context.lineTo(this.penData.coords.x, this.penData.coords.y)
 		this.context.stroke()
 
-		this.pen.coords.px = this.pen.coords.x
-		this.pen.coords.py = this.pen.coords.y
-		this.pen.drawed = true
+		this.penData.coords.px = this.penData.coords.x
+		this.penData.coords.py = this.penData.coords.y
+		this.penData.dragged = true
 	}
 
 
@@ -184,6 +173,19 @@ class Drawable {
 		this.history.reset(this.canvas.toDataURL())
 	}
 
+	refresh = () => {
+		this.clearCanvas()
+		this.history.reset(this.canvas.toDataURL())
+		this.canvas.width = this.drawedOnElement.clientWidth
+		this.canvas.height = this.drawedOnElement.clientHeight
+
+		const context = this.canvas.getContext("2d")
+		if (!context)
+			throw new Error("Couldn't create the context.")
+
+		this.context = context
+	}
+
 
 	loadFromDataUrl = (canvasDataUrl: string) => {
 		this.pen.stopErasing()
@@ -200,4 +202,4 @@ class Drawable {
 
 
 
-export default Drawable
+export default DrawOver

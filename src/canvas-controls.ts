@@ -2,7 +2,7 @@ import CanvasHistory from "./canvas-history"
 import CanvasPen from "./canvas-pen"
 import ColorPalette from "./color-palette"
 import ColorSphere from "./color-sphere"
-import Drawable from "./drawable"
+import DrawOver from "./draw-over"
 import { cn, createClearIcon, createEraserIcon, createRedoIcon, createUndoIcon } from "./utils"
 
 
@@ -13,21 +13,11 @@ class CanvasControls {
 	view: HTMLDivElement
 
 	constructor(
-		drawable: Drawable,
+		drawOver: DrawOver,
 		pen: CanvasPen,
 		colorPalette: ColorPalette,
 		history: CanvasHistory,
 	) {
-		const verticalSeperator = document.createElement("div")
-		verticalSeperator.className = cn("vertical-seperator")
-
-		const verticalSeperator2 = document.createElement("div")
-		verticalSeperator2.className = cn("vertical-seperator")
-
-		const horizontalSeperator = document.createElement("div")
-		horizontalSeperator.className = cn("horizontal-seperator")
-
-
 		this.view = document.createElement("div")
 		this.view.className = cn("control-view")
 
@@ -35,28 +25,24 @@ class CanvasControls {
 		const stateControls = document.createElement("div")
 		stateControls.className = cn("state-controls")
 		this.view.appendChild(stateControls)
-		// this.view.appendChild(verticalSeperator)
 
 		const undoButton = document.createElement("button")
 		undoButton.className = cn("undo-redo-button")
 		if (history.currentStepIndex === 0)
 			undoButton.disabled = true
-		const undoIcon = createUndoIcon()
-		undoButton.appendChild(undoIcon)
+		undoButton.appendChild(createUndoIcon())
 		stateControls.appendChild(undoButton)
 
 		const redoButton = document.createElement("button")
 		redoButton.className = cn("undo-redo-button")
 		if (history.currentStepIndex === history.steps.length - 1)
 			redoButton.disabled = true
-		const redoIcon = createRedoIcon()
-		redoButton.appendChild(redoIcon)
+		redoButton.appendChild(createRedoIcon())
 		stateControls.appendChild(redoButton)
 
 		const clearButton = document.createElement("button")
 		clearButton.className = cn("clear-button")
-		const clearIcon = createClearIcon()
-		clearButton.appendChild(clearIcon)
+		clearButton.appendChild(createClearIcon())
 		stateControls.appendChild(clearButton)
 
 
@@ -64,7 +50,6 @@ class CanvasControls {
 		const colorControls = document.createElement("div")
 		colorControls.className = cn("color-controls")
 		this.view.appendChild(colorControls)
-		// this.view.appendChild(verticalSeperator2)
 
 
 		const colorPicker = document.createElement("input")
@@ -95,8 +80,7 @@ class CanvasControls {
 
 		const eraserButton = document.createElement("button")
 		eraserButton.classList.add(cn("eraser-button"))
-		const eraserIcon = createEraserIcon()
-		eraserButton.appendChild(eraserIcon)
+		eraserButton.appendChild(createEraserIcon())
 		colorControls.appendChild(eraserButton)
 
 		const penControl = document.createElement("div")
@@ -123,61 +107,55 @@ class CanvasControls {
 
 
 
+		// EVENT LISTENERS
 		undoButton.addEventListener("click", history.back)
 		redoButton.addEventListener("click", history.forward)
-		clearButton.addEventListener("click", drawable.clearCanvas)
+		clearButton.addEventListener("click", drawOver.clearCanvas)
 		eraserButton.addEventListener("click", () => {
-			pen.erasing ?
-				pen.stopErasing() :
-				pen.startErasing()
+			pen.erasing = !pen.erasing
 		})
-
 
 		colorPicker.addEventListener("change", (e) => {
 			const color = (e.target as HTMLInputElement).value
-			pen.setColor(color)
+			pen.color = color
 			colorPalette.addCustomColor(color)
 		})
 
-
-		penSizeSlider.addEventListener("change", e => pen.setSize((e.target as HTMLInputElement).valueAsNumber))
-		penSizeSlider.addEventListener("input", e => penPreviewLine.style.height = `${(e.target as HTMLInputElement).valueAsNumber}px`)
-
-
-
-		pen.onColorChange(() => {
-			penPreviewLine.style.backgroundColor = pen.color
-			colorPicker.value = pen.color
+		penSizeSlider.addEventListener("change", e => {
+			const size = (e.target as HTMLInputElement).valueAsNumber
+			pen.size = size
+			penPreviewLine.style.height = `${size}px`
 		})
-		pen.onSizeChange(() => {
-			penPreviewLine.style.height = `${pen.size}px`
+		penSizeSlider.addEventListener("input", e => {
+			const size = (e.target as HTMLInputElement).valueAsNumber
+			penPreviewLine.style.height = `${size}px`
 		})
-		pen.onErasingStateChange(() => {
-			if (pen.erasing)
+
+
+		// STATE SYNCRONISING
+		pen.onColorChange(color => {
+			penPreviewLine.style.backgroundColor = color
+			colorPicker.value = color
+		})
+		pen.onSizeChange(size => {
+			penPreviewLine.style.height = `${size}px`
+		})
+		pen.onErasingStateChange(erasing => {
+			if (erasing)
 				eraserButton.classList.add(cn("eraser-button-selected"))
 			else
 				eraserButton.classList.remove(cn("eraser-button-selected"))
 		})
 
-
-		colorPalette.onColorsChange(() => {
-			customColorSpheres.forEach((sphere, idx) => {
-				sphere.setColor(colorPalette.customColors[idx])
+		colorPalette.onColorsChange(colors => {
+			customColorSpheres.forEach((sphere, i) => {
+				sphere.color = colors.custom[i]
 			})
 		})
 
-
 		history.onHistoryChange(() => {
-			console.log("History Chagned")
-			if (history.currentStepIndex === 0)
-				undoButton.disabled = true
-			else
-				undoButton.disabled = false
-
-			if (history.currentStepIndex === history.steps.length - 1)
-				redoButton.disabled = true
-			else
-				redoButton.disabled = false
+			undoButton.disabled = history.currentStepIndex === 0
+			redoButton.disabled = history.currentStepIndex === history.steps.length - 1
 		})
 	}
 }

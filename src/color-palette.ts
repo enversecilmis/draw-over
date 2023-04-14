@@ -1,12 +1,20 @@
+import { NEmptyArr } from "./utils"
+
+type OnColorsChangeCallback = (colors: {
+	default: string[]
+	custom: string[]
+}) => void
+
+
 class ColorPalette {
-	defaultColors: string[]
-	customColors: string[]
-	onColorsChangeCallbacks: (() => void)[]
+	defaultColors: NEmptyArr<string>
+	customColors: NEmptyArr<string>
+	private onColorsChangeCallbacks: OnColorsChangeCallback[]
 
 
-	constructor(defaultColorPalette: string[]) {
+	constructor(defaultColorPalette: NEmptyArr<string>) {
 		this.defaultColors = defaultColorPalette
-		this.customColors = new Array(this.defaultColors.length).fill("")
+		this.customColors = new Array(this.defaultColors.length).fill("") as NEmptyArr<string>
 		this.onColorsChangeCallbacks = []
 	}
 
@@ -17,16 +25,22 @@ class ColorPalette {
 
 		this.customColors.pop()
 		this.customColors.unshift(newHexColor)
-		this.onColorsChangeCallbacks.forEach(callback => callback())
+		this.onColorsChangeCallbacks.forEach(callback => callback({
+			default: this.defaultColors,
+			custom: this.customColors,
+		}))
 	}
 
-	onColorsChange = (callback: () => void) => {
+	onColorsChange = (callback: OnColorsChangeCallback) => {
 		this.onColorsChangeCallbacks.push(callback)
 	}
 
 	reset = () => {
-		this.customColors = new Array(this.defaultColors.length).fill("")
-		this.onColorsChangeCallbacks.forEach(callback => callback())
+		this.customColors = new Array(this.defaultColors.length).fill("") as [string, ...string[]]
+		this.onColorsChangeCallbacks.forEach(callback => callback({
+			default: this.defaultColors,
+			custom: this.customColors,
+		}))
 	}
 }
 
