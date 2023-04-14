@@ -1,0 +1,28 @@
+{
+	"name": "draw-over",
+	"version": "1.0.0",
+	"description": "Give it an HTML elements id and start drawing over it.",
+	"main": "drawable.js",
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1",
+		"build": "tsc"
+	},
+	"keywords": [
+		"drawable",
+		"drawable html",
+		"make drawable",
+		"canvas drawable",
+		"draw over html"
+	],
+	"files": [
+		"dist",
+		"LICENCE",
+		"README.md"
+	],
+	"author": "Enver Seçilmiş",
+	"license": "ISC",
+	"devDependencies": {
+		"esbuild": "^0.17.16",
+		"typescript": "^5.0.4"
+	}
+}
