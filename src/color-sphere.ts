@@ -33,6 +33,7 @@ class ColorSphere {
 		this.view.addEventListener("click", () => {
 			if (!this.color)
 				return
+			pen.stopErasing()
 			pen.color = this.color
 		})
 
