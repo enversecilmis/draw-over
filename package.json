@@ -3,6 +3,10 @@
 	"version": "1.0.1",
 	"description": "Give it an HTML elements id and start drawing over it.",
 	"main": "dist/index.js",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/enversecilmis/draw-over"
+	},
 	"scripts": {
 		"test": "echo \"Error: no test specified\" && exit 1",
 		"build": "npx tsc"
