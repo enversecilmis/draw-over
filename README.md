@@ -1,7 +1,7 @@
 
 # draw-over
 Give it a css selector and start drawing over the HTML element you want.
-It also puts it's own control panel (color selection etc.) which is not customizable at the time under the element.
+It also puts it's own control panel under the element (color selection etc.) which is not customizable at the time.
 
 ## API Reference
 
