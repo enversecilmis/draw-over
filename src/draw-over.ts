@@ -160,7 +160,7 @@ class DrawOver {
 		this.drawedOnElement.removeChild(this.controlPanel.view)
 	}
 
-	toggleCanvas = () => {
+	toggleDrawing = () => {
 		if (this.drawedOnElement.contains(this.canvas))
 			this.stopDrawing()
 		else
