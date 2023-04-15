@@ -21,7 +21,8 @@
 	"files": [
 		"dist/**/*",
 		"declarations/**/*",
-		"style.css"
+		"style.css",
+		"style.css.d.ts"
 	],
 	"author": "Enver Seçilmiş",
 	"license": "ISC",
