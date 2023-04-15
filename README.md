@@ -37,6 +37,7 @@ someButton.addEventListener("click", drawover.toggle)
 It places a canvas on top of the element using `absolute` positioning. So the element should not have static positioning. Which is why it checks if the element is static and changes it to `relative` position if it is.
 
 When the HTML element changes in size it doesn't automatically fit itself accordingly. So you have to call the `refresh` method on the drawable object.
+Which resets the canvas.
 ```javascript
 drawable.refresh()
 ```
