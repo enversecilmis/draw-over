@@ -7,7 +7,7 @@ import { DEFAULT_COLOR_PALETTE, NEmptyArr, cn } from "./utils"
 
 
 type Options = {
-	defaultColors: NEmptyArr<string>
+	defaultColors?: NEmptyArr<string>
 }
 
 
@@ -29,7 +29,7 @@ class DrawOver {
 
 	constructor(selector: string, {
 		defaultColors = DEFAULT_COLOR_PALETTE as NEmptyArr<string>,
-	}: Options) {
+	}: Options = {}) {
 		this.drawedOnElement = document.querySelector(selector) as HTMLElement
 
 		if (!this.drawedOnElement)
