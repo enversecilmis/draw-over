@@ -2,10 +2,10 @@
 	"name": "draw-over",
 	"version": "1.0.1",
 	"description": "Give it an HTML elements id and start drawing over it.",
-	"main": "./dist/drawable.js",
+	"main": "dist/index.js",
 	"scripts": {
 		"test": "echo \"Error: no test specified\" && exit 1",
-		"build": "tsc"
+		"build": "npx tsc"
 	},
 	"keywords": [
 		"drawable",
@@ -15,11 +15,9 @@
 		"draw over html"
 	],
 	"files": [
-		"dist",
-		"LICENCE",
-		"README.md",
-		"style.css",
-		"style.css.d.ts"
+		"dist/**/*",
+		"declarations/**/*",
+		"style.css"
 	],
 	"author": "Enver Seçilmiş",
 	"license": "ISC",

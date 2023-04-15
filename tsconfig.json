@@ -4,12 +4,7 @@
 		"module": "CommonJS",
 		"strict": true,
 		"declaration": true,
-		"outDir": "./dist",
-		"rootDir": "./src",
+		"declarationDir": "declarations",
+		"outDir": "dist"
 	},
-	"exclude": [
-		"tests",
-		"dist",
-		"node-modules",
-	]
 }
